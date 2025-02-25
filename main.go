@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const version_constraint = "1.23.3"
+
 type Configuration struct {
 	Ascii_Art      string `json:"ascii_art"`
 	Top_Langs      int    `json:"top_langs"`
@@ -20,17 +22,39 @@ type Configuration struct {
 	URI            string `json:"URI"`
 }
 
+func main() {
+	var user_configuration = load_config()
+	var client = create_gitea_client(user_configuration.URI, user_configuration.Token)
+
+	args := os.Args[1:]
+	for _, arg := range args {
+		if arg == "-v" || arg == "--version" {
+			print_gitea_server_version(client)
+			return
+		}
+	}
+
+	fmt.Println("No valid arguments provided")
+}
+
 func load_config() Configuration {
 	jsonFile, err := os.Open("./configuration/configuration.json")
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Successfully Opened ./configuration/configuration.json")
 	defer jsonFile.Close()
 	byteValue, _ := io.ReadAll(jsonFile)
 	var user_configuration Configuration
 	json.Unmarshal(byteValue, &user_configuration)
 	return user_configuration
+}
+
+func create_gitea_client(config_uri string, config_token string) *gitea.Client {
+	client, err := gitea.NewClient(config_uri, gitea.SetToken(config_token))
+	if err != nil {
+		fmt.Println("Error creating Gitea client:", err)
+	}
+	return client
 }
 
 func print_config(user_configuration Configuration) {
@@ -45,18 +69,10 @@ func print_config(user_configuration Configuration) {
 	fmt.Println("Edison Version: ", user_configuration.Edison_Version)
 }
 
-// WIP
-/*
-func create_gitea_client() {
-	client, err := gitea.NewClient("http://192.168.7.2:3029", gitea.SetToken("4134b116be73b40c8bc8051dd29fc76f64d53f23"))
+func print_gitea_server_version(client *gitea.Client) {
+	version, _, err := client.ServerVersion()
 	if err != nil {
-		fmt.Println("Error creating Gitea client:", err)
-		return
+		fmt.Println("Error getting Gitea server version:", err)
 	}
-}
-*/
-
-func main() {
-	var user_configuration = load_config()
-	print_config(user_configuration)
+	fmt.Println(version)
 }
