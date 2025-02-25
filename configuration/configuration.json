@@ -1,0 +1,11 @@
+{
+  "token": "8465cf9a4321b8c6b4a45d376bf13bdca2a854df",
+  "URI": "http://192.168.7.2:3029",
+  "ascii_art": "string",
+  "top_langs": 3,
+  "repo_count": true,
+  "include_orgs": false,
+  "gitea_user": true,
+  "gitea_version": true,
+  "edison_version": true
+}
