@@ -11,15 +11,15 @@ import (
 const version_constraint = "1.23.3"
 
 type Configuration struct {
-	Ascii_Art      string `json:"ascii_art"`
-	Top_Langs      int    `json:"top_langs"`
-	Repo_Count     bool   `json:"repo_count"`
-	Include_Orgs   bool   `json:"include_orgs"`
-	Gitea_User     bool   `json:"gitea_user"`
-	Gitea_Version  bool   `json:"gitea_version"`
-	Edison_Version bool   `json:"edison_version"`
-	Token          string `json:"token"`
-	URI            string `json:"URI"`
+	Ascii_Art      []string `json:"ascii_art"`
+	Top_Langs      int      `json:"top_langs"`
+	Repo_Count     bool     `json:"repo_count"`
+	Include_Orgs   bool     `json:"include_orgs"`
+	Gitea_User     bool     `json:"gitea_user"`
+	Gitea_Version  bool     `json:"gitea_version"`
+	Edison_Version bool     `json:"edison_version"`
+	Token          string   `json:"token"`
+	URI            string   `json:"URI"`
 }
 
 func main() {
@@ -30,6 +30,14 @@ func main() {
 	for _, arg := range args {
 		if arg == "-h" || arg == "--help" {
 			print_help()
+			return
+		}
+		if arg == "-v" || arg == "--version" {
+			print_edison_version()
+			return
+		}
+		if arg == "-a" || arg == "--art" {
+			print_ascii_art(user_configuration.Ascii_Art)
 			return
 		}
 		if arg == "-g" || arg == "--gitea" {
@@ -62,11 +70,22 @@ func print_edison_fetch() {
 
 func print_help() {
 	fmt.Println("-h or --help for this menu")
+	fmt.Println("-v or --version for edison version")
+	fmt.Println("-a or --art for art")
 	fmt.Println("-g or --gitea for gitea version")
 	fmt.Println("-c or --config to see config")
 	fmt.Println("-u or --user to see gitea user")
 	fmt.Println("-r or --repos to see user repos")
 	fmt.Println("-o or --orgs to see org repos")
+}
+func print_ascii_art(ascii_config []string) {
+	for _, line := range ascii_config {
+		fmt.Println(line)
+	}
+}
+
+func print_edison_version() {
+	fmt.Println("Edison Version: 1.0.0")
 }
 
 func load_config() Configuration {
@@ -134,6 +153,7 @@ func print_user_repos(client *gitea.Client) {
 		}
 	}
 }
+
 func print_org_repos(client *gitea.Client) {
 	user_orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
 	if err != nil {
@@ -153,3 +173,10 @@ func print_org_repos(client *gitea.Client) {
 	}
 
 }
+
+func create_gitea_repo() {
+
+}
+
+// Should pull include_orgs bool from config
+func print_user_repo_count() {}
