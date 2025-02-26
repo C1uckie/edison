@@ -123,9 +123,20 @@ func print_user_repos(client *gitea.Client) {
 	if err != nil {
 		fmt.Println("Error getting Gitea user repos:", err)
 	}
+
 	for _, repo := range user_repos {
-		fmt.Println(repo.Name)
-		fmt.Println(repo.SSHURL)
+
+		gitea_user_data, _, err := client.GetMyUserInfo()
+		if err != nil {
+			fmt.Println("Error getting Gitea user:", err)
+		}
+
+		if repo.Owner.UserName == gitea_user_data.UserName {
+			fmt.Println(repo.Name)
+			fmt.Println(repo.SSHURL)
+
+		}
+
 	}
 }
 
