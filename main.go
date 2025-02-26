@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"code.gitea.io/sdk/gitea"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 const version_constraint = "1.23.3"
@@ -64,6 +66,10 @@ func main() {
 			print_user_repo_count(user_configuration.Repo_Count, user_configuration.Include_Orgs, client)
 			return
 		}
+		if arg == "-m" || arg == "--make" {
+			create_gitea_repo(client)
+			return
+		}
 	}
 
 	print_edison_fetch()
@@ -82,6 +88,7 @@ func print_help() {
 	fmt.Println("-r or --repos to see user repos")
 	fmt.Println("-o or --orgs to see org repos")
 	fmt.Println("-l or --list to see repo count")
+	fmt.Println("-m or --make to create repo")
 }
 func print_ascii_art(ascii_config []string) {
 	for _, line := range ascii_config {
@@ -179,7 +186,43 @@ func print_org_repos(client *gitea.Client) {
 
 }
 
-func create_gitea_repo() {}
+func create_gitea_repo(client *gitea.Client) {
+	var user_options = gitea.CreateRepoOption{}
+
+	fmt.Print("Repo Name: ")
+	user_options.Name, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+	user_options.Name = strings.TrimSpace(user_options.Name)
+
+	fmt.Print("Repo Description: ")
+	user_options.Description, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+	user_options.Description = strings.TrimSpace(user_options.Description)
+
+	var user_private_response string
+	fmt.Print("Private Repo (y/n): ")
+	fmt.Scanln(&user_private_response)
+
+	user_private_response = strings.ToLower(user_private_response)
+
+	if user_private_response == "y" {
+		fmt.Println("The repo will be private.")
+		user_options.Private = true
+	} else if user_private_response == "n" {
+		fmt.Println("The repo will not be private.")
+		user_options.Private = false
+	} else {
+		fmt.Println("Invalid input. The repo will be private.")
+		user_options.Private = false
+	}
+
+	repo_creation, _, err := client.CreateRepo(user_options)
+	if err != nil {
+		fmt.Println("Error create Gitea repos:", err)
+	}
+	fmt.Println("Created repo with following settings:", repo_creation.Name)
+	fmt.Println("Name: ", repo_creation.Name)
+	fmt.Println("Description: ", repo_creation.Description)
+	fmt.Println("Private: ", repo_creation.Private)
+}
 
 func print_user_repo_count(config_repo_count bool, config_include_orgs bool, client *gitea.Client) {
 	var user_repo_count = 0
