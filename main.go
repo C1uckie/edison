@@ -22,19 +22,45 @@ type Configuration struct {
 	URI            string `json:"URI"`
 }
 
+type Gitea_User struct {
+	Username string `json:"username"`
+}
+
 func main() {
 	var user_configuration = load_config()
 	var client = create_gitea_client(user_configuration.URI, user_configuration.Token)
 
 	args := os.Args[1:]
 	for _, arg := range args {
-		if arg == "-v" || arg == "--version" {
+		if arg == "-h" || arg == "--help" {
+			print_help()
+			return
+		}
+		if arg == "-g" || arg == "--gitea" {
 			print_gitea_server_version(client)
+			return
+		}
+		if arg == "-c" || arg == "--config" {
+			print_config(user_configuration)
+			return
+		}
+		if arg == "-u" || arg == "--user" {
+			print_gitea_user(client)
 			return
 		}
 	}
 
-	fmt.Println("No valid arguments provided")
+	print_edison_fetch()
+}
+func print_edison_fetch() {
+	fmt.Println("Default Fetch, should listen to config.json")
+}
+
+func print_help() {
+	fmt.Println("-h or --help for this menu")
+	fmt.Println("-g or --gitea for gitea version")
+	fmt.Println("-c or --config to see config")
+	fmt.Println("-u or --user to see gitea user")
 }
 
 func load_config() Configuration {
@@ -75,4 +101,17 @@ func print_gitea_server_version(client *gitea.Client) {
 		fmt.Println("Error getting Gitea server version:", err)
 	}
 	fmt.Println(version)
+}
+
+func print_gitea_user(client *gitea.Client) {
+	gitea_user_data, _, err := client.GetMyUserInfo()
+	if err != nil {
+		fmt.Println("Error getting Gitea user:", err)
+	}
+
+	gitea_user_info := Gitea_User{
+		Username: gitea_user_data.UserName,
+	}
+
+	fmt.Println("Username:", gitea_user_info.Username)
 }
