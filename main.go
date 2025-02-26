@@ -22,10 +22,6 @@ type Configuration struct {
 	URI            string `json:"URI"`
 }
 
-type Gitea_User struct {
-	Username string `json:"username"`
-}
-
 func main() {
 	var user_configuration = load_config()
 	var client = create_gitea_client(user_configuration.URI, user_configuration.Token)
@@ -109,9 +105,5 @@ func print_gitea_user(client *gitea.Client) {
 		fmt.Println("Error getting Gitea user:", err)
 	}
 
-	gitea_user_info := Gitea_User{
-		Username: gitea_user_data.UserName,
-	}
-
-	fmt.Println("Username:", gitea_user_info.Username)
+	fmt.Println("Username:", gitea_user_data.UserName)
 }
