@@ -1,4 +1,4 @@
-module gitea.elbaph.local/c1uckie/edison
+module gitea.ohara.local/c1uckie/edison
 
 go 1.24.0
 
