@@ -60,6 +60,10 @@ func main() {
 			print_org_repos(client)
 			return
 		}
+		if arg == "-l" || arg == "--list" {
+			print_user_repo_count(user_configuration.Repo_Count, user_configuration.Include_Orgs, client)
+			return
+		}
 	}
 
 	print_edison_fetch()
@@ -77,6 +81,7 @@ func print_help() {
 	fmt.Println("-u or --user to see gitea user")
 	fmt.Println("-r or --repos to see user repos")
 	fmt.Println("-o or --orgs to see org repos")
+	fmt.Println("-l or --list to see repo count")
 }
 func print_ascii_art(ascii_config []string) {
 	for _, line := range ascii_config {
@@ -174,9 +179,35 @@ func print_org_repos(client *gitea.Client) {
 
 }
 
-func create_gitea_repo() {
+func create_gitea_repo() {}
 
+func print_user_repo_count(config_repo_count bool, config_include_orgs bool, client *gitea.Client) {
+	var user_repo_count = 0
+	if config_repo_count == false {
+		return
+	}
+
+	user_repos, _, err := client.ListMyRepos(gitea.ListReposOptions{})
+	if err != nil {
+		fmt.Println("Error getting Gitea user repos:", err)
+	}
+
+	if config_include_orgs == false {
+		gitea_user_data, _, err := client.GetMyUserInfo()
+		if err != nil {
+			fmt.Println("Error getting Gitea user:", err)
+		}
+
+		for _, repo := range user_repos {
+			if repo.Owner.UserName == gitea_user_data.UserName {
+				user_repo_count++
+			}
+		}
+		fmt.Println(user_repo_count)
+		return
+	} else {
+		user_repo_count = len(user_repos)
+		fmt.Println(user_repo_count)
+		return
+	}
 }
-
-// Should pull include_orgs bool from config
-func print_user_repo_count() {}
