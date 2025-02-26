@@ -123,42 +123,32 @@ func print_user_repos(client *gitea.Client) {
 	if err != nil {
 		fmt.Println("Error getting Gitea user repos:", err)
 	}
-
 	for _, repo := range user_repos {
-
 		gitea_user_data, _, err := client.GetMyUserInfo()
 		if err != nil {
 			fmt.Println("Error getting Gitea user:", err)
 		}
-
 		if repo.Owner.UserName == gitea_user_data.UserName {
 			fmt.Println(repo.Name)
 			fmt.Println(repo.SSHURL)
-
 		}
-
 	}
 }
-
 func print_org_repos(client *gitea.Client) {
 	user_orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
 	if err != nil {
 		fmt.Println("Error getting Gitea user orgs:", err)
 	}
-
 	for _, org := range user_orgs {
 		var org_name = org.UserName
 		fmt.Println(org.UserName)
-
 		org_repos, _, err := client.ListOrgRepos(org_name, gitea.ListOrgReposOptions{})
 		if err != nil {
 			fmt.Println("Error getting Gitea org repos:", err)
 		}
-
 		for _, repo := range org_repos {
 			fmt.Println(repo.Name)
 			fmt.Println(repo.SSHURL)
-
 		}
 	}
 
