@@ -44,6 +44,14 @@ func main() {
 			print_gitea_user(client)
 			return
 		}
+		if arg == "-r" || arg == "--repos" {
+			print_user_repos(client)
+			return
+		}
+		if arg == "-o" || arg == "--orgs" {
+			print_org_repos(client)
+			return
+		}
 	}
 
 	print_edison_fetch()
@@ -57,6 +65,8 @@ func print_help() {
 	fmt.Println("-g or --gitea for gitea version")
 	fmt.Println("-c or --config to see config")
 	fmt.Println("-u or --user to see gitea user")
+	fmt.Println("-r or --repos to see user repos")
+	fmt.Println("-o or --orgs to see org repos")
 }
 
 func load_config() Configuration {
@@ -106,4 +116,39 @@ func print_gitea_user(client *gitea.Client) {
 	}
 
 	fmt.Println("Username:", gitea_user_data.UserName)
+}
+
+func print_user_repos(client *gitea.Client) {
+	user_repos, _, err := client.ListMyRepos(gitea.ListReposOptions{})
+	if err != nil {
+		fmt.Println("Error getting Gitea user repos:", err)
+	}
+	for _, repo := range user_repos {
+		fmt.Println(repo.Name)
+		fmt.Println(repo.SSHURL)
+	}
+}
+
+func print_org_repos(client *gitea.Client) {
+	user_orgs, _, err := client.ListMyOrgs(gitea.ListOrgsOptions{})
+	if err != nil {
+		fmt.Println("Error getting Gitea user orgs:", err)
+	}
+
+	for _, org := range user_orgs {
+		var org_name = org.UserName
+		fmt.Println(org.UserName)
+
+		org_repos, _, err := client.ListOrgRepos(org_name, gitea.ListOrgReposOptions{})
+		if err != nil {
+			fmt.Println("Error getting Gitea org repos:", err)
+		}
+
+		for _, repo := range org_repos {
+			fmt.Println(repo.Name)
+			fmt.Println(repo.SSHURL)
+
+		}
+	}
+
 }
