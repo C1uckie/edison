@@ -7,9 +7,9 @@
     "||__||||__||||__||||__||||__||||__||",
     "|/__\\||/__\\||/__\\||/__\\||/__\\||/__\\|"
   ],
-  "top_langs": 3,
+  "top_langs": 5,
   "repo_count": true,
-  "include_orgs": false,
+  "include_orgs": true,
   "gitea_user": true,
   "gitea_version": true,
   "edison_version": true

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -22,6 +23,11 @@ type Configuration struct {
 	Edison_Version bool     `json:"edison_version"`
 	Token          string   `json:"token"`
 	URI            string   `json:"URI"`
+}
+
+type langStat struct {
+	Lang       string
+	Percentage float64
 }
 
 func main() {
@@ -70,9 +76,17 @@ func main() {
 			create_gitea_repo(client)
 			return
 		}
+		if arg == "-b" || arg == "--better" {
+			print_user_langs(client, user_configuration.Include_Orgs, false, user_configuration.Top_Langs)
+		}
+		if arg == "-s" || arg == "--stoopid" {
+			print_user_langs(client, user_configuration.Include_Orgs, true, user_configuration.Top_Langs)
+		}
+		if arg == "-t" || arg == "--test" {
+			print_user_total_loc(client, user_configuration.Include_Orgs)
+		}
 	}
 
-	print_edison_fetch()
 }
 func print_edison_fetch() {
 	fmt.Println("Default Fetch, should listen to config.json")
@@ -89,7 +103,10 @@ func print_help() {
 	fmt.Println("-o or --orgs to see org repos")
 	fmt.Println("-l or --list to see repo count")
 	fmt.Println("-m or --make to create repo")
+	fmt.Println("-b or --better to print langs")
+	fmt.Println("-s or --stoopid to print top langs")
 }
+
 func print_ascii_art(ascii_config []string) {
 	for _, line := range ascii_config {
 		fmt.Println(line)
@@ -253,4 +270,115 @@ func print_user_repo_count(config_repo_count bool, config_include_orgs bool, cli
 		fmt.Println(user_repo_count)
 		return
 	}
+}
+
+func print_user_langs(client *gitea.Client, include_org bool, top_only bool, user_top_langs int) {
+	langStats := make(map[string]int64)
+	var totalLines int64
+
+	user_repos, _, err := client.ListMyRepos(gitea.ListReposOptions{})
+	if err != nil {
+		fmt.Println("Error getting Gitea user repos:", err)
+		return
+	}
+
+	gitea_user_data, _, err := client.GetMyUserInfo()
+	if err != nil {
+		fmt.Println("Error getting Gitea user:", err)
+	}
+
+	if !include_org {
+		for _, repo := range user_repos {
+			if repo.Owner.UserName == gitea_user_data.UserName {
+				repo_lang_data, _, err := client.GetRepoLanguages(gitea_user_data.UserName, repo.Name)
+				if err != nil {
+					fmt.Println("Error getting repo lang data:", err)
+					continue
+				}
+
+				for lang, size := range repo_lang_data {
+					langStats[lang] += size
+					totalLines += size
+				}
+			}
+		}
+
+	} else {
+		for _, repo := range user_repos {
+			repo_lang_data, _, err := client.GetRepoLanguages(gitea_user_data.UserName, repo.Name)
+			if err != nil {
+				fmt.Println("Error getting repo lang data:", err)
+				continue
+			}
+			for lang, size := range repo_lang_data {
+				langStats[lang] += size
+				totalLines += size
+			}
+		}
+	}
+	var sortedLangs []langStat
+	for lang, size := range langStats {
+		percentage := (float64(size) / float64(totalLines)) * 100
+		sortedLangs = append(sortedLangs, langStat{Lang: lang, Percentage: percentage})
+	}
+
+	sort.Slice(sortedLangs, func(i, j int) bool {
+		return sortedLangs[i].Percentage > sortedLangs[j].Percentage
+	})
+
+	if !top_only {
+		for _, entry := range sortedLangs {
+			fmt.Printf("%s: %.2f%%\n", entry.Lang, entry.Percentage)
+		}
+	} else {
+		fmt.Println("Top Languages:")
+		for i, entry := range sortedLangs {
+			if i >= user_top_langs {
+				break
+			}
+			fmt.Printf("%s: %.2f%%\n", entry.Lang, entry.Percentage)
+		}
+	}
+}
+
+func print_user_total_loc(client *gitea.Client, include_org bool) {
+	var totalLines int64
+
+	user_repos, _, err := client.ListMyRepos(gitea.ListReposOptions{})
+	if err != nil {
+		fmt.Println("Error getting Gitea user repos:", err)
+		return
+	}
+
+	gitea_user_data, _, err := client.GetMyUserInfo()
+	if err != nil {
+		fmt.Println("Error getting Gitea user:", err)
+	}
+
+	if !include_org {
+		for _, repo := range user_repos {
+			if repo.Owner.UserName == gitea_user_data.UserName {
+				repo_lang_data, _, err := client.GetRepoLanguages(gitea_user_data.UserName, repo.Name)
+				if err != nil {
+					fmt.Println("Error getting repo lang data:", err)
+					continue
+				}
+				for _, size := range repo_lang_data {
+					totalLines += size
+				}
+			}
+		}
+	} else {
+		for _, repo := range user_repos {
+			repo_lang_data, _, err := client.GetRepoLanguages(gitea_user_data.UserName, repo.Name)
+			if err != nil {
+				fmt.Println("Error getting repo lang data:", err)
+				continue
+			}
+			for _, size := range repo_lang_data {
+				totalLines += size
+			}
+		}
+	}
+	fmt.Println("Total Lines of Code:", totalLines)
 }
