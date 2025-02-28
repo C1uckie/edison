@@ -1,30 +1,21 @@
 # edison
 
-Gitea CLI fetch tool written in Go
+Gitea CLI fetch tool written in Go using the Gitea SDK.
 
 ## Purpose
 Just a small CLI I use to keep my workflow inside the CLI.
 
-## Project Setup
-```sh
-go mod init gitea.ohara.local/c1uckie/edison
-go get code.gitea.io/sdk/gitea
-```
-
-## Installation
-To be determined
-
 ## Usage
 1. Create an API token
 2. Add the Gitea API token and URI to your config.json
-3. run `edison`
+3. run `edison` or `edison -h`
 
 ## Configuration
 Default JSON configuration
 ```json
 {
-  "token": "8465cf9a4321b8c6b4a45d376bf13bdca2a854df",
-  "URI": "http://192.168.7.2:3029",
+  "token": "gitea_app_token",
+  "URI": "gitea_uri",
   "ascii_art": [
     " ____  ____  ____  ____  ____  ____ ",
     "||E ||||d ||||i ||||s ||||o ||||n ||",
@@ -39,3 +30,6 @@ Default JSON configuration
   "edison_version": true
 }
 ```
+
+## Exmaple
+![Example Image](example.png)
