@@ -1,6 +1,9 @@
-# edison
+<div align="center">
 
-Gitea CLI fetch tool written in Go using the Gitea SDK.
+# Edison
+Named after one of the Vegapunk satellites from One Piece. Edison is a Gitea CLI fetch tool written in Go using the Gitea SDK.
+</div>
+<hr>
 
 ## Purpose
 Just a small CLI I use to keep my workflow inside the CLI.
@@ -39,3 +42,6 @@ Default JSON configuration
 
 ## Exmaple
 ![Example Image](example.png)
+
+## Contributions
+Sure.
