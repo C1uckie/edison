@@ -5,6 +5,12 @@ Gitea CLI fetch tool written in Go using the Gitea SDK.
 ## Purpose
 Just a small CLI I use to keep my workflow inside the CLI.
 
+## Build
+Clone repo.
+```sh
+go build -ldflags="-s -w"
+```
+
 ## Usage
 1. Create an API token
 2. Add the Gitea API token and URI to your config.json
