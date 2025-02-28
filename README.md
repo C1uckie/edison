@@ -40,7 +40,7 @@ Default JSON configuration
 }
 ```
 
-## Exmaple
+## Example
 ![Example Image](example.png)
 
 ## Contributions
